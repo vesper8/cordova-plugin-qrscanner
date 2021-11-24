@@ -61,6 +61,8 @@ class QRScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate {
     var scanning: Bool = false
     var paused: Bool = false
     var nextScanningCommand: CDVInvokedUrlCommand?
+    
+    var originalBackgroundColor: UIColor?;
 
     enum QRScannerError: Int32 {
         case unexpected_error = 0,
@@ -198,7 +200,7 @@ class QRScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate {
 
     @objc func makeOpaque(){
         self.webView?.isOpaque = false
-        self.webView?.backgroundColor = UIColor.clear
+        self.webView?.backgroundColor = self.originalBackgroundColor
     }
 
     @objc func boolToNumberString(bool: Bool) -> String{
@@ -291,6 +293,7 @@ class QRScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate {
 
     @objc func show(_ command: CDVInvokedUrlCommand) {
         self.webView?.isOpaque = false
+        self.originalBackgroundColor = self.webView?.backgroundColor
         self.webView?.backgroundColor = UIColor.clear
         self.getStatus(command)
     }
@@ -468,7 +471,7 @@ class QRScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate {
 
     @objc func openSettings(_ command: CDVInvokedUrlCommand) {
         if #available(iOS 10.0, *) {
-            guard let settingsUrl = URL(string: UIApplication.openSettingsURLString) else {
+            guard let settingsUrl = URL(string: UIApplicationOpenSettingsURLString) else {
             return
         }
         if UIApplication.shared.canOpenURL(settingsUrl) {
@@ -481,7 +484,7 @@ class QRScanner : CDVPlugin, AVCaptureMetadataOutputObjectsDelegate {
         } else {
             // pre iOS 10.0
             if #available(iOS 8.0, *) {
-                UIApplication.shared.openURL(NSURL(string: UIApplication.openSettingsURLString)! as URL)
+                UIApplication.shared.openURL(NSURL(string: UIApplicationOpenSettingsURLString)! as URL)
                 self.getStatus(command)
             } else {
                 self.sendErrorCode(command: command, error: QRScannerError.open_settings_unavailable)
